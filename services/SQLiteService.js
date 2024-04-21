@@ -1,43 +1,93 @@
 //Käytä Expon SQLite (next) kirjastoa
-import * as SQLite from 'expo-sqlite/next';
 
-const db = await SQLite.openDatabaseAsync('molkkyDb');
+// OpenDatabaseAsync ei toimi, mennään syncillä, initialize toimii normaalisti;
+
+import * as SQLite from 'expo-sqlite/next';
+const db = SQLite.openDatabaseSync('molkkyDb');
 
 const SQLiteService = {
 
-    //Alustus
+    //Alustus 
+    
     initialize: async () => {
-        await db.execAsync(`
+        try {
+            await db.execAsync(`
             CREATE TABLE IF NOT EXISTS game (
                 id INTEGER PRIMARY KEY NOT NULL,
-                title TEXT,
+                title TEXT
             );
+            
             CREATE TABLE IF NOT EXISTS player (
                 id INTEGER PRIMARY KEY NOT NULL,
-                username TEXT,
+                username TEXT
             );
+            
             CREATE TABLE IF NOT EXISTS gameplayer (
                 game_id INTEGER,
                 player_id INTEGER,
                 points INTEGER,
                 PRIMARY KEY (game_id, player_id),
                 FOREIGN KEY (game_id) REFERENCES game(id),
-                FOREIGN KEY (player_id) REFENCES player(id)
+                FOREIGN KEY (player_id) REFERENCES player(id)
             );
-        `);
-    },
 
-    //Hae kaikki X rivit ja välitä promise saaduilla arvoilla
-    fetchTable: async (table) => {
-        try {
-            const data = db.getAllAsync('SELECT * FROM ?', [table]);
-            return data;
+        `);
+        console.log('Initialize onnistui!');
         }
         catch (err) {
-            throw new Error(`Error fetching rows from ${table}: ${err}`);
+            console.error('Error initializing db:' + err);
+        }
+
+    },
+    
+    //Hae kaikki X rivit ja välitä promise saaduilla arvoilla
+    fetchGame: async () => {
+        try {
+            const data = await db.getAllAsync('SELECT * FROM game');
+            if (data === null) {
+                return([]);
+            }
+            else {
+                return data;
+            }
+        }
+        catch (err) {
+            throw new Error(`Error fetching rows from game: ${err}`);
         }
     },
 
+    fetchPlayer: async () => {
+        try {
+            const data = await db.getAllAsync('SELECT * FROM player');
+            if (data === null) {
+                return([]);
+            }
+            else {
+                return data;
+            }
+        }
+        catch (err) {
+            throw new Error(`Error fetching rows from player: ${err}`);
+        }
+    },
+
+    fetchGamePlayer: async () => {
+        try {
+            const data = await db.getAllAsync('SELECT * FROM gameplayer');
+            if (data === null) {
+                return([]);
+            }
+            else {
+                return data;
+            }
+        }
+        catch (err) {
+            throw new Error(`Error fetching rows from gameplayer: ${err}`);
+        }
+    },
+
+    /* Taulua ei voi korjavata ?, TODO
+    // TODO Tee tarpeen mukaan omat jokaiselle
     //Hae saadulla taululla ja id:llä ensimmäinen kyselyä vastaava rivi
     fetchRowById: async (table, id) => {
         try {
@@ -66,7 +116,7 @@ const SQLiteService = {
         catch (err) {
             throw new Error('Error removing row from DB: ' + err);
         }
-    },
+    }, */
 
     //Lisää rivi game tauluun
     addGame: async ({ game }) => {
@@ -142,18 +192,12 @@ const SQLiteService = {
                 JOIN player ON gameplayer.player_id = player.id
                 WHERE game.id = $gameId
             `, { $gameId: id });
-
-            if (data.length > 0) {
-                return data;
-            }
-            else {
-                throw new Error('No game data found from DB with ID: ' + id);
-            }
+            return data;
         }
         catch (err) {
             throw new Error('Error updating the game: ' + err);
         }
-    },
+    }, 
 }
-
-export default SQLiteService;
+ 
+export default SQLiteService; 
