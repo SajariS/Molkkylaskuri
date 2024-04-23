@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { FlatList, StyleSheet, View } from "react-native";
 import SQLiteService from "../services/SQLiteService";
 import AddPlayerDialog from "./AddPlayerDialog";
+import RemovePlayerDialog from "./RemovePlayerDialog";
 
 
 export default function GameScreen({ navigation, route }) {
@@ -15,7 +16,9 @@ export default function GameScreen({ navigation, route }) {
         id: null
     });
     const [players, setPlayers] = useState([]);
-    const [visible, setVisible] = useState(false);
+    const [visibleAdd, setVisibleAdd] = useState(false);
+    const [visibleRemove, setVisibleRemove] = useState(false);
+    const [removePlayerId, setRemovePlayerId] = useState(null);
 
     const handleUpdate = () => {
         SQLiteService.updateGame(gameData.id)
@@ -23,8 +26,23 @@ export default function GameScreen({ navigation, route }) {
         .catch(err => console.error(err))
     }
 
-    const toggleOverlay = () => {
-        setVisible(!visible);
+    const toggleAddOverlay = () => {
+        setVisibleAdd(!visibleAdd);
+    }
+
+    const toggleRemoveOverlay = () => {
+        setVisibleRemove(!visibleRemove);
+    }
+
+    const handleLongPress = (playerId) => {
+        setRemovePlayerId(playerId);
+        toggleRemoveOverlay();
+    }
+
+    const handlePlayerRemove = (playerId) => {
+        SQLiteService.removeConnection(game.id, playerId)
+        .then(() => handleUpdate())
+        .catch(err => console.error(err))
     }
 
     useEffect(() => {
@@ -39,7 +57,7 @@ export default function GameScreen({ navigation, route }) {
 
     renderItem = ({ item }) => (
         <ListItem bottomDivider
-            onLongPress={() => console.log("Todo poisto dialogi")}
+            onLongPress={() => handleLongPress(item.id)}
         >
             <ListItem.Content style={styles.listContainer}>
                 <ListItem.Title>
@@ -57,17 +75,23 @@ export default function GameScreen({ navigation, route }) {
         <View style={styles.container}>
             <Button 
                 title="Lisää pelaaja"
-                onPress={() => toggleOverlay()}
+                onPress={() => toggleAddOverlay()}
             />
-            <Overlay isVisible={visible} onBackdropPress={toggleOverlay}>
-                <AddPlayerDialog game={game} />
+            <Overlay isVisible={visibleAdd} onBackdropPress={toggleAddOverlay}>
+                <AddPlayerDialog game={game} handleUpdate={handleUpdate} toggleOverlay={toggleAddOverlay} />
             </Overlay>
+            <Overlay isVisible={visibleRemove} onBackdropPress={toggleRemoveOverlay}>
+                <RemovePlayerDialog playerId={removePlayerId} setPlayerId={setRemovePlayerId} handlePlayerRemove={handlePlayerRemove} toggleOverlay={toggleRemoveOverlay} />
+            </Overlay>
+            {players.length === 0 ? 
+            <Text h3>Lisää pelaajia!</Text> 
+            : 
             <FlatList
                 style={styles.list}
                 keyExtractor={(_, index) => index.toString()}
                 renderItem={renderItem}
                 data={players}               
-            />
+            /> }
         </View>
     )
 }

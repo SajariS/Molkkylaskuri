@@ -4,7 +4,7 @@ import { StyleSheet, View } from "react-native"
 import SQLiteService from "../services/SQLiteService"
 import { FlatList } from "react-native"
 
-export default function AddPlayerDialog({ game }) {
+export default function AddPlayerDialog({ game, handleUpdate, toggleOverlay }) {
 
     const [players, setPlayers] = useState([]);
     const [input, setInput] = useState('');
@@ -25,8 +25,13 @@ export default function AddPlayerDialog({ game }) {
 
     const handleAddConnection = (id) => {
         SQLiteService.addConnection(game.id, id)
+        .then(() => {
+            handleUpdate();
+            toggleOverlay();
+        })
         .catch(err => console.error(err))
     }
+
 
     useEffect(() => {
         handlePlayerUpdate();

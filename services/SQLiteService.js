@@ -158,7 +158,7 @@ const SQLiteService = {
     //Poista yhteys game ja player väliltä
     removeConnection: async (gameId, playerId) => {
         try {
-            await db.runAsync('DELETE FROM gameplayer WHERE game_id = $gameId AND player_id = $playerId)', {
+            await db.runAsync('DELETE FROM gameplayer WHERE game_id = $gameId AND player_id = $playerId', {
                 $gameId: gameId,
                 $playerId: playerId
             });
@@ -167,6 +167,57 @@ const SQLiteService = {
             throw new Error('Error removing connection from DB: ' + err);
         }
     },
+
+    //Poista kaikki pelin yhteydet
+    removeGameConnection: async (gameId) => {
+        try {
+            await db.runAsync('DELETE FROM gameplayer WHERE game_id = $gameId', {
+                $gameId: gameId
+            });
+        }
+        catch (err) {
+            throw new Error('Error removing connection from DB: ' + err);
+        }
+    },
+
+    //Poista peli
+    removeGame: async (gameId) => {
+        try {
+            await SQLiteService.removeGameConnection(gameId);
+            await db.runAsync('DELETE FROM game WHERE id = $gameId', {
+                $gameId: gameId
+            });
+        }
+        catch (err) {
+            throw new Error('Error removing connection from DB: ' + err);
+        }
+    },
+
+    //Poista kaikki pelaajan yhteydet
+    removePlayerConnection: async (playerId) => {
+        try {
+            await db.runAsync('DELETE FROM gameplayer WHERE player_id = $playerId', {
+                $playerId: playerId
+            });
+        }
+        catch (err) {
+            throw new Error('Error removing connection from DB: ' + err);
+        }
+    },
+
+    //Poista pelaaja
+    removePlayer: async (playerId) => {
+        try {
+            await SQLiteService.removePlayerConnection(playerId);
+            await db.runAsync('DELETE FROM player WHERE id = $playerId', {
+                $playerId: playerId
+            });
+        }
+        catch (err) {
+            throw new Error('Error removing connection from DB: ' + err);
+        }
+    },
+
 
     //Päivitä pisteitä, pelin kannalta tärkeä
     setPoints: async (gameId, playerId, points) => {

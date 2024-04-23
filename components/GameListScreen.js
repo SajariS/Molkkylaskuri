@@ -2,15 +2,20 @@ import { useIsFocused } from "@react-navigation/native";
 import { useEffect, useState } from "react";
 import { FlatList, StyleSheet, View } from "react-native";
 import SQLiteService from "../services/SQLiteService";
-import { Button, Icon, ListItem, Text } from "@rneui/themed";
+import { Button, Icon, ListItem, Overlay, Text } from "@rneui/themed";
+import AddGameDialog from "./AddGameDialog";
+import DeleteGameDialog from "./DeleteGameDialog";
 
 export default function GameListScreen({ navigation }) {
 
     const isFocused = useIsFocused();
     const [gameList, setGameList] = useState([]);
     const [game, setGame] = useState({
-        title: 'testi'
-    })
+        title: ''
+    });
+    const [visibleAdd, setVisibleAdd] = useState(false);
+    const [visibleRemove, setVisibleRemove] = useState(false);
+    const [removeGameId, setRemoveGameId] = useState(null);
 
     const handleGameFetch = () => {
         SQLiteService.fetchGame()
@@ -22,6 +27,25 @@ export default function GameListScreen({ navigation }) {
         SQLiteService.addGame({game})
         .then(() => handleGameFetch())
         .catch(err = console.error)
+    }
+
+    const handleDeleteGame = (gameId) => {
+        SQLiteService.removeGame(gameId)
+        .then(() => handleGameFetch())
+        .catch(err => console.error(err))
+    }
+
+    const handleLongPress = (gameId) => {
+        setRemoveGameId(gameId);
+        toggleRemoveOverlay();
+    }
+
+    const toggleAddOverlay = () => {
+        setVisibleAdd(!visibleAdd);
+    }
+
+    const toggleRemoveOverlay = () => {
+        setVisibleRemove(!visibleRemove);
     }
 
     useEffect(() => {
@@ -37,6 +61,7 @@ export default function GameListScreen({ navigation }) {
                 title: item.title,
                 id: item.id
             }})}
+            onLongPress={() => handleLongPress(item.id)}
         >
             <ListItem.Content style={styles.listContainer}>
                 <ListItem.Title>{item.title}</ListItem.Title>
@@ -48,7 +73,7 @@ export default function GameListScreen({ navigation }) {
         <View style={styles.listHeader}>
             <Text h2>Testipesti</Text>
             <Button radius={'sm'} type="solid" 
-                onPress={() => handleAddGame()}
+                onPress={() => toggleAddOverlay()}
             >
                 Lisää
                 <Icon name='add' />
@@ -58,6 +83,12 @@ export default function GameListScreen({ navigation }) {
 
     return(
         <View style={styles.container}>
+            <Overlay isVisible={visibleAdd} onBackdropPress={toggleAddOverlay}>
+                <AddGameDialog game={game} setGame={setGame} handleAddGame={handleAddGame} toggleAddOverlay={toggleAddOverlay} />
+            </Overlay>
+            <Overlay isVisible={visibleRemove} onBackdropPress={toggleRemoveOverlay}>
+                <DeleteGameDialog gameId={removeGameId} setGameId={setRemoveGameId} handleDeleteGame={handleDeleteGame} toggleOverlay={toggleRemoveOverlay}/>
+            </Overlay>
             <FlatList
                 style={styles.list}
                 ListHeaderComponent={renderHeader}
