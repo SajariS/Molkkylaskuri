@@ -5,6 +5,10 @@ import { FlatList, StyleSheet, View } from "react-native";
 import SQLiteService from "../services/SQLiteService";
 import AddPlayerDialog from "./AddPlayerDialog";
 import RemovePlayerDialog from "./RemovePlayerDialog";
+import AddPointsDialog from "./AddPointsDialog";
+import GameService from "../services/GameService";
+import { ListItemChevron } from "@rneui/base/dist/ListItem/ListItem.Chevron";
+import { ListItemSubtitle } from "@rneui/base/dist/ListItem/ListItem.Subtitle";
 
 
 export default function GameScreen({ navigation, route }) {
@@ -18,12 +22,22 @@ export default function GameScreen({ navigation, route }) {
     const [players, setPlayers] = useState([]);
     const [visibleAdd, setVisibleAdd] = useState(false);
     const [visibleRemove, setVisibleRemove] = useState(false);
+    const [visiblePoints, setVisiblePoints] = useState(false);
     const [removePlayerId, setRemovePlayerId] = useState(null);
+    const [turn, setTurn] = useState({});
 
     const handleUpdate = () => {
         SQLiteService.updateGame(gameData.id)
-        .then(data => setPlayers(data))
+        .then(data => {
+            setPlayers(data);
+        })
         .catch(err => console.error(err))
+    }
+
+    const handleGameFetch = (gameId) => {
+        SQLiteService.fetchGameById(gameId)
+        .then(data => setGame(data))
+        .catch(error => console.error(error))
     }
 
     const toggleAddOverlay = () => {
@@ -34,9 +48,19 @@ export default function GameScreen({ navigation, route }) {
         setVisibleRemove(!visibleRemove);
     }
 
+    const togglePointsOverlay = () => {
+        setVisiblePoints(!visiblePoints)
+    }
+
     const handleLongPress = (playerId) => {
         setRemovePlayerId(playerId);
         toggleRemoveOverlay();
+    }
+
+    const handlePress = (playerData) => {
+        console.log(playerData);
+        setTurn(playerData);
+        togglePointsOverlay();
     }
 
     const handlePlayerRemove = (playerId) => {
@@ -45,51 +69,113 @@ export default function GameScreen({ navigation, route }) {
         .catch(err => console.error(err))
     }
 
+    const handleWin = (username) => {
+        if(game.winner === null) {
+            SQLiteService.setWinner(game.id, username)
+            .then(() => handleGameFetch(game.id))
+            .catch(error => console.error(error))
+        }
+    }
+
+    const handleTurn = (playerData, points) => {
+        GameService.handleTurn(playerData, game.id, points)
+        .then(points => {
+            if(points === 50) {
+                handleWin(playerData.username);
+            }
+            handleUpdate();
+        })
+        .catch(error => console.error(error))
+    }
+
     useEffect(() => {
         if(isFocused) {
-            setGame({...game,
+            /*setGame({...game,
                 title: gameData.title,
                 id: gameData.id
-            })
+            }) */
+            handleGameFetch(gameData.id);
             handleUpdate();
         }
     }, [isFocused])
 
-    renderItem = ({ item }) => (
-        <ListItem bottomDivider
-            onLongPress={() => handleLongPress(item.id)}
-        >
-            <ListItem.Content style={styles.listContainer}>
-                <ListItem.Title>
-                    {item.username}: {item.points}
-                </ListItem.Title>
-                <Icon 
-                    name="add"
-                    onPress={() => console.log("TODO pisteen lisäys dialogi")}
-                />
-            </ListItem.Content>
-        </ListItem>
+    const renderItem = ({ item }) => {
+
+        const strikes= [];
+        for(let i = 0; i < item.strikes; i++) {
+            strikes.push(<Icon key={i.toString()} name="clear" size={20} color="red"/>);
+        }
+
+        return(
+            <ListItem bottomDivider
+                onLongPress={() => handleLongPress(item.id)}
+                onPress={() => handlePress(item)}
+            >
+                <ListItem.Content style={styles.listContainer}>
+                    <ListItem.Title>
+                        {item.username} pisteet: {item.points}
+                    </ListItem.Title>
+                    <ListItemSubtitle>
+                        <View style={styles.strikeContainer}>{strikes}</View>
+                    </ListItemSubtitle>
+                    <ListItemChevron
+                        solid={true}
+                        color="black"
+                        size={25}
+                    />
+                </ListItem.Content>
+            </ListItem>
+        )
+    }
+
+    const renderHeader = () => (
+        <View style={styles.listHeader}>
+            <View>
+                <Text h2>{game.title}</Text>
+                {game.winner === null ? 
+                <>
+                    <Text> </Text>
+                </>
+                :
+                <>
+                    <Text>Voittaja: {game.winner}</Text>
+                </>
+                }
+            </View>
+
+            <Button radius={'sm'} type="solid" 
+                onPress={() => toggleAddOverlay()}
+            >
+                Lisää Pelaaja
+            </Button>
+        </View>
     )
 
     return(
         <View style={styles.container}>
-            <Button 
-                title="Lisää pelaaja"
-                onPress={() => toggleAddOverlay()}
-            />
             <Overlay isVisible={visibleAdd} onBackdropPress={toggleAddOverlay}>
                 <AddPlayerDialog game={game} handleUpdate={handleUpdate} toggleOverlay={toggleAddOverlay} />
             </Overlay>
             <Overlay isVisible={visibleRemove} onBackdropPress={toggleRemoveOverlay}>
                 <RemovePlayerDialog playerId={removePlayerId} setPlayerId={setRemovePlayerId} handlePlayerRemove={handlePlayerRemove} toggleOverlay={toggleRemoveOverlay} />
             </Overlay>
+            <Overlay isVisible={visiblePoints} onBackdropPress={togglePointsOverlay}>
+                <AddPointsDialog handleTurn={handleTurn} toggleOverlay={togglePointsOverlay} turn={turn} setTurn={setTurn}/>
+            </Overlay>
             {players.length === 0 ? 
-            <Text h3>Lisää pelaajia!</Text> 
+            <>
+                <Text h3>Lisää pelaajia!</Text>
+                <Button 
+                title="Lisää pelaaja"
+                onPress={() => toggleAddOverlay()}
+            />               
+            </>            
             : 
             <FlatList
                 style={styles.list}
                 keyExtractor={(_, index) => index.toString()}
                 renderItem={renderItem}
+                ListHeaderComponent={renderHeader}
                 data={players}               
             /> }
         </View>
@@ -141,5 +227,10 @@ const styles = StyleSheet.create({
     },
     icon: {
         fontSize: 20
+    },
+    strikeContainer: {
+        flex: 1,
+        flexDirection: 'row', 
+        width: 100,
     }
   });

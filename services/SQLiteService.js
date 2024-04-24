@@ -12,32 +12,48 @@ const SQLiteService = {
     initialize: async () => {
         try {
             await db.execAsync(`
-            CREATE TABLE IF NOT EXISTS game (
-                id INTEGER PRIMARY KEY NOT NULL,
-                title TEXT
-            );
-            
-            CREATE TABLE IF NOT EXISTS player (
-                id INTEGER PRIMARY KEY NOT NULL,
-                username TEXT
-            );
-            
-            CREATE TABLE IF NOT EXISTS gameplayer (
-                game_id INTEGER,
-                player_id INTEGER,
-                points INTEGER,
-                PRIMARY KEY (game_id, player_id),
-                FOREIGN KEY (game_id) REFERENCES game(id),
-                FOREIGN KEY (player_id) REFERENCES player(id)
-            );
+                CREATE TABLE IF NOT EXISTS game (
+                    id INTEGER PRIMARY KEY NOT NULL,
+                    title TEXT,
+                    winner TEXT
+                );
+                
+                CREATE TABLE IF NOT EXISTS player (
+                    id INTEGER PRIMARY KEY NOT NULL,
+                    username TEXT
+                );
+                
+                CREATE TABLE IF NOT EXISTS gameplayer (
+                    game_id INTEGER,
+                    player_id INTEGER,
+                    points INTEGER,
+                    strikes INTEGER,
+                    PRIMARY KEY (game_id, player_id),
+                    FOREIGN KEY (game_id) REFERENCES game(id),
+                    FOREIGN KEY (player_id) REFERENCES player(id)
+                );
 
-        `);
-        console.log('Initialize onnistui!');
+            `);
+            console.log('Initialize onnistui!');
         }
         catch (err) {
             console.error('Error initializing db:' + err);
         }
 
+    },
+
+    resetDb: async () => {
+        try {
+            await db.execAsync(`
+                DROP TABLE IF EXISTS game;
+                DROP TABLE IF EXISTS player;
+                DROP TABLE IF EXISTS gameplayer;
+            `);
+            SQLiteService.initialize();
+        }
+        catch (err){
+            throw new Error("Error reseting DB: " + err);
+        }
     },
     
     //Hae kaikki X rivit ja välitä promise saaduilla arvoilla
@@ -53,6 +69,18 @@ const SQLiteService = {
         }
         catch (err) {
             throw new Error(`Error fetching rows from game: ${err}`);
+        }
+    },
+
+    fetchGameById: async (gameId) => {
+        try {
+            const data = await db.getFirstAsync('SELECT * FROM game WHERE id = $gameId', {
+                $gameId: gameId
+            });
+            return data;
+        }
+        catch (err) {
+            throw new Error('Error fetching row from game: ' + err)
         }
     },
 
@@ -145,7 +173,7 @@ const SQLiteService = {
     //Lisää yhteys game ja player välille, pisteet aluksi 0
     addConnection: async (gameId, playerId) => {
         try {
-            await db.runAsync('INSERT INTO gameplayer (game_id, player_id, points) VALUES ($gameId, $playerId, 0)', {
+            await db.runAsync('INSERT INTO gameplayer (game_id, player_id, points, strikes) VALUES ($gameId, $playerId, 0, 0)', {
                 $gameId: gameId,
                 $playerId: playerId
             });
@@ -229,7 +257,32 @@ const SQLiteService = {
             });
         }
         catch (err) {
-            throw new Error('Error setting points to DB: ' + err)
+            throw new Error('Error setting points to DB: ' + err);
+        }
+    },
+
+    setStrikes: async (gameId, playerId, strikes) => {
+        try {
+            await db.runAsync('UPDATE gameplayer SET strikes = $strikes WHERE game_id = $gameId AND player_id = $playerId', {
+                $gameId: gameId,
+                $playerId: playerId,
+                $strikes: strikes
+            });
+        }
+        catch (err) {
+            throw new Error('Error setting points to DB: ' + err);
+        }
+    },
+
+    setWinner: async (gameId, username) => {
+        try {
+            await db.runAsync('UPDATE game SET winner = $winner WHERE id = $gameId', {
+                $gameId: gameId,
+                $winner: username
+            });
+        }
+        catch (err) {
+            throw new Error('Error setting winner: ' + err);
         }
     },
 
@@ -237,7 +290,7 @@ const SQLiteService = {
     updateGame: async (id) => {
         try {
             const data = await db.getAllAsync(`
-                SELECT game.*, player.*, gameplayer.points
+                SELECT game.title, player.*, gameplayer.points, gameplayer.strikes
                 FROM game
                 JOIN gameplayer ON game.id = gameplayer.game_id
                 JOIN player ON gameplayer.player_id = player.id

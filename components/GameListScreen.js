@@ -2,7 +2,7 @@ import { useIsFocused } from "@react-navigation/native";
 import { useEffect, useState } from "react";
 import { FlatList, StyleSheet, View } from "react-native";
 import SQLiteService from "../services/SQLiteService";
-import { Button, Icon, ListItem, Overlay, Text } from "@rneui/themed";
+import { Button, ButtonGroup, Icon, ListItem, Overlay, Text } from "@rneui/themed";
 import AddGameDialog from "./AddGameDialog";
 import DeleteGameDialog from "./DeleteGameDialog";
 
@@ -48,6 +48,12 @@ export default function GameListScreen({ navigation }) {
         setVisibleRemove(!visibleRemove);
     }
 
+    const handleReset = () => {
+        SQLiteService.resetDb()
+        .then(() => handleGameFetch())
+        .catch(error => console.error(error))
+    }
+
     useEffect(() => {
         if(isFocused) {
             handleGameFetch();
@@ -78,6 +84,10 @@ export default function GameListScreen({ navigation }) {
                 Lisää
                 <Icon name='add' />
             </Button>
+            <Button
+                onPress={() => handleReset()}
+                title="Reset"
+            />
         </View>
     )
 

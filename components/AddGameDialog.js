@@ -1,11 +1,28 @@
-import { StyleSheet, View } from "react-native"
-import { Icon, Input, Text } from "@rneui/themed"
+import { Alert, StyleSheet, View } from "react-native"
+import { Icon, Input, Text, Button } from "@rneui/themed"
+import ValidationService from "../services/ValidationService";
 
 
 export default function AddGameDialog({ game, setGame, handleAddGame, toggleAddOverlay}) {
 
-    const addGame = () => {
-        handleAddGame();
+    const handleAdd = () => {
+        if(ValidationService.validateText(game.title)) {
+            handleAddGame();
+            toggleAddOverlay();
+            setGame({...game, title: ''});
+        }
+        else {
+            Alert.alert(
+                'Virheellinen syöte!',
+                'Pelin nimi ei voi olla tyhjä',
+                [
+                    { text: 'OK', onPress: () => console.log("Ok")}
+                ]
+            )
+        }
+    }
+
+    const handleClose = () => {
         toggleAddOverlay();
         setGame({...game, title: ''});
     }
@@ -17,13 +34,25 @@ export default function AddGameDialog({ game, setGame, handleAddGame, toggleAddO
                 placeholder="Nimi"
                 value={game.title}
                 onChangeText={value => setGame({...game, title: value})}
-                rightIcon={
-                    <Icon
-                        name="add"
-                        onPress={() => addGame()}
-                    />
-                }
             />
+            <View style={styles.buttonContainer}>
+                <Button color="green"
+                    onPress={() => handleAdd()}
+                >
+                    <Icon
+                        name="done"
+                        color="white"
+                    />
+                </Button>
+                <Button color="red"
+                    onPress={() => handleClose()}
+                >
+                    <Icon
+                        name="close"
+                        color="white"
+                    />
+                </Button>
+            </View>            
         </View>
     )
 }
@@ -40,7 +69,13 @@ const styles = StyleSheet.create({
     },
     dialogInput: {
         width: 300,
-        padding: 10
+        padding: 10,
+        marginTop: 10
         
+    },
+    buttonContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-evenly',
+        width: '80%'
     }
 })

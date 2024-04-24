@@ -1,8 +1,9 @@
-import { Button, Icon, Input, ListItem, Text } from "@rneui/themed"
-import { useEffect, useState } from "react"
-import { StyleSheet, View } from "react-native"
-import SQLiteService from "../services/SQLiteService"
-import { FlatList } from "react-native"
+import { Icon, Input, ListItem, Text } from "@rneui/themed";
+import { useEffect, useState } from "react";
+import { StyleSheet, View, Keyboard, Alert } from "react-native";
+import SQLiteService from "../services/SQLiteService";
+import { FlatList } from "react-native";
+import ValidationService from "../services/ValidationService";
 
 export default function AddPlayerDialog({ game, handleUpdate, toggleOverlay }) {
 
@@ -10,11 +11,25 @@ export default function AddPlayerDialog({ game, handleUpdate, toggleOverlay }) {
     const [input, setInput] = useState('');
 
     const handleAddPlayer = () => {
-        SQLiteService.addPlayer({ player: {
-            username: input
-        }})
-        .then(() => handlePlayerUpdate())
-        .catch(err => console.error(err))
+        if(ValidationService.validateText(input)) {
+            SQLiteService.addPlayer({ player: {
+                username: input
+            }})
+            .then(() => {
+                handlePlayerUpdate();
+                Keyboard.dismiss();
+            })
+            .catch(err => console.error(err))
+        }
+        else {
+            Alert.alert(
+                'Virheellinen syöte!',
+                'Pelaajan nimi ei voi olla tyhjä',
+                [
+                    { text: 'OK', onPress: () => console.log("Ok")}
+                ]
+            )            
+        }
     }
 
     const handlePlayerUpdate = () => {
@@ -32,6 +47,23 @@ export default function AddPlayerDialog({ game, handleUpdate, toggleOverlay }) {
         .catch(err => console.error(err))
     }
 
+    const handlePlayerDelete = (playerId) => {
+        SQLiteService.removePlayer(playerId)
+        .then(() => handlePlayerUpdate())
+        .catch(error => console.error(error))
+    }
+
+    const handleLongPress = (playerId) => {
+        Alert.alert(
+            'Pelaajan poisto',
+            'Haluatko varmasti poistaa pelaajan?',
+            [
+                { text: 'Kyllä', onPress: () => handlePlayerDelete(playerId)},
+                { text: 'Ei', onPress: () => {}}
+            ]
+        )
+    }
+
 
     useEffect(() => {
         handlePlayerUpdate();
@@ -40,6 +72,7 @@ export default function AddPlayerDialog({ game, handleUpdate, toggleOverlay }) {
     renderItem = ({ item }) => (
         <ListItem bottomDivider
             onPress={() => handleAddConnection(item.id)}
+            onLongPress={() => handleLongPress(item.id)}
         >
             <ListItem.Content>
                 <ListItem.Title>{item.username}</ListItem.Title>
@@ -51,7 +84,6 @@ export default function AddPlayerDialog({ game, handleUpdate, toggleOverlay }) {
         <View style={styles.dialogContainer}>
             <Text h3>Lisää pelaaja peliin</Text>
             <Input style={styles.dialogInput} 
-                label="Uusi pelaaja"
                 placeholder="Nimi"
                 onChangeText={value => setInput(value)}
                 value={input}
@@ -77,14 +109,15 @@ const styles = StyleSheet.create({
         padding: 20,
         borderRadius: 8,
         alignItems: 'center',
-        width: 350
+        width: 350,
+        height: 500
     },
     dialogList: {
        width: 300
     },
     dialogInput: {
         width: 300,
-        padding: 10
-        
+        padding: 10,    
+        marginTop: 10
     }
 })
