@@ -5,10 +5,12 @@ import SQLiteService from "../services/SQLiteService";
 import { FlatList } from "react-native";
 import ValidationService from "../services/ValidationService";
 
-export default function AddPlayerDialog({ game, handleUpdate, toggleOverlay }) {
+export default function AddPlayerDialog({ game, handleUpdate, toggleOverlay, gamePlayers }) {
 
     const [players, setPlayers] = useState([]);
     const [input, setInput] = useState('');
+
+    const existingPlayers = gamePlayers.map(player => player.id);
 
     const handleAddPlayer = () => {
         if(ValidationService.validateText(input)) {
@@ -16,6 +18,7 @@ export default function AddPlayerDialog({ game, handleUpdate, toggleOverlay }) {
                 username: input
             }})
             .then(() => {
+                setInput('');
                 handlePlayerUpdate();
                 Keyboard.dismiss();
             })
@@ -34,7 +37,7 @@ export default function AddPlayerDialog({ game, handleUpdate, toggleOverlay }) {
 
     const handlePlayerUpdate = () => {
         SQLiteService.fetchPlayer()
-        .then(data => setPlayers(data))
+        .then(data => setPlayers(data.filter(player => !existingPlayers.includes(player.id))))
         .catch(err => console.error(err))
     }
 
@@ -49,7 +52,10 @@ export default function AddPlayerDialog({ game, handleUpdate, toggleOverlay }) {
 
     const handlePlayerDelete = (playerId) => {
         SQLiteService.removePlayer(playerId)
-        .then(() => handlePlayerUpdate())
+        .then(() => {
+            handlePlayerUpdate();
+            handleUpdate();
+        })
         .catch(error => console.error(error))
     }
 
@@ -80,6 +86,7 @@ export default function AddPlayerDialog({ game, handleUpdate, toggleOverlay }) {
         </ListItem>
     )
 
+    //TODO Estä pelissä olevan pelaajan uudestaan lisääminen
     return(
         <View style={styles.dialogContainer}>
             <Text h3>Lisää pelaaja peliin</Text>

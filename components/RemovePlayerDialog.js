@@ -16,8 +16,8 @@ export default function RemovePlayerDialog({ playerId, setPlayerId, handlePlayer
 
     return(
         <View style={styles.dialogContainer} >
-        <Text h3>Haluatko varmasti poistaa pelaajan pelistä?</Text>
-        <View>
+        <Text h3>Poista pelaaja pelistä?</Text>
+        <View style={styles.buttonContainer}>
             <Button color="green"
                 onPress={() => handleRemove()}
             >
@@ -53,5 +53,11 @@ const styles = StyleSheet.create({
         width: 300,
         padding: 10
         
+    },
+    buttonContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-evenly',
+        width: '80%',
+        paddingVertical: 15
     }
 })

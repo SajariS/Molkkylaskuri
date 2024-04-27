@@ -1,5 +1,5 @@
 import { useIsFocused } from "@react-navigation/native";
-import { Button, Input, Overlay, Text, Icon, ListItem } from "@rneui/themed";
+import { Button, Input, Overlay, Text, Icon, ListItem, Header } from "@rneui/themed";
 import { useEffect, useState } from "react";
 import { FlatList, StyleSheet, View } from "react-native";
 import SQLiteService from "../services/SQLiteService";
@@ -88,6 +88,10 @@ export default function GameScreen({ navigation, route }) {
         .catch(error => console.error(error))
     }
 
+    const handleNavi = () => {
+        navigation.navigate('Lista')
+    }
+
     useEffect(() => {
         if(isFocused) {
             /*setGame({...game,
@@ -112,9 +116,14 @@ export default function GameScreen({ navigation, route }) {
                 onPress={() => handlePress(item)}
             >
                 <ListItem.Content style={styles.listContainer}>
-                    <ListItem.Title>
-                        {item.username} pisteet: {item.points}
-                    </ListItem.Title>
+                    <View>
+                        <ListItem.Title style={styles.listTitle}>
+                            {item.username}
+                        </ListItem.Title>
+                        <ListItem.Subtitle style={styles.listSubtitle}>
+                            Pisteet: {item.points}
+                        </ListItem.Subtitle>
+                    </View>
                     <ListItemSubtitle>
                         <View style={styles.strikeContainer}>{strikes}</View>
                     </ListItemSubtitle>
@@ -146,15 +155,23 @@ export default function GameScreen({ navigation, route }) {
             <Button radius={'sm'} type="solid" 
                 onPress={() => toggleAddOverlay()}
             >
-                Lisää Pelaaja
+                <Icon 
+                    name="add"
+                    color="white"
+                    size={25}
+                />
             </Button>
         </View>
     )
 
     return(
         <View style={styles.container}>
+            <Header 
+                centerComponent={{ text: 'Mölkkylaskuri ', style: styles.headerTitle}}
+                leftComponent={{ icon: 'west', color: 'white', size: 25, onPress: () => handleNavi()}}
+            />
             <Overlay isVisible={visibleAdd} onBackdropPress={toggleAddOverlay}>
-                <AddPlayerDialog game={game} handleUpdate={handleUpdate} toggleOverlay={toggleAddOverlay} />
+                <AddPlayerDialog game={game} handleUpdate={handleUpdate} toggleOverlay={toggleAddOverlay} gamePlayers={players} />
             </Overlay>
             <Overlay isVisible={visibleRemove} onBackdropPress={toggleRemoveOverlay}>
                 <RemovePlayerDialog playerId={removePlayerId} setPlayerId={setRemovePlayerId} handlePlayerRemove={handlePlayerRemove} toggleOverlay={toggleRemoveOverlay} />
@@ -162,22 +179,13 @@ export default function GameScreen({ navigation, route }) {
             <Overlay isVisible={visiblePoints} onBackdropPress={togglePointsOverlay}>
                 <AddPointsDialog handleTurn={handleTurn} toggleOverlay={togglePointsOverlay} turn={turn} setTurn={setTurn}/>
             </Overlay>
-            {players.length === 0 ? 
-            <>
-                <Text h3>Lisää pelaajia!</Text>
-                <Button 
-                title="Lisää pelaaja"
-                onPress={() => toggleAddOverlay()}
-            />               
-            </>            
-            : 
             <FlatList
                 style={styles.list}
                 keyExtractor={(_, index) => index.toString()}
                 renderItem={renderItem}
                 ListHeaderComponent={renderHeader}
                 data={players}               
-            /> }
+            />
         </View>
     )
 }
@@ -187,7 +195,6 @@ const styles = StyleSheet.create({
       flex: 1,
       backgroundColor: '#fff',
       alignItems: 'center',
-      justifyContent: 'center',
       width: '100%'
     },
     list: {
@@ -232,5 +239,16 @@ const styles = StyleSheet.create({
         flex: 1,
         flexDirection: 'row', 
         width: 100,
+    },
+    listTitle: {
+        fontWeight: 'bold',
+        fontSize: 20
+    },
+    listSubtitle: {
+        color: 'gray'
+    },
+    headerTitle: {
+        color: 'white',
+        fontSize: 25
     }
   });

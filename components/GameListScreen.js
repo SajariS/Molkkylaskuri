@@ -2,9 +2,10 @@ import { useIsFocused } from "@react-navigation/native";
 import { useEffect, useState } from "react";
 import { FlatList, StyleSheet, View } from "react-native";
 import SQLiteService from "../services/SQLiteService";
-import { Button, ButtonGroup, Icon, ListItem, Overlay, Text } from "@rneui/themed";
+import { Button, ButtonGroup, Header, Icon, ListItem, Overlay, Text } from "@rneui/themed";
 import AddGameDialog from "./AddGameDialog";
 import DeleteGameDialog from "./DeleteGameDialog";
+import SettingsDialog from "./SettingsDialog";
 
 export default function GameListScreen({ navigation }) {
 
@@ -15,6 +16,7 @@ export default function GameListScreen({ navigation }) {
     });
     const [visibleAdd, setVisibleAdd] = useState(false);
     const [visibleRemove, setVisibleRemove] = useState(false);
+    const [visibleSettings, setVisibleSettings] = useState(false);
     const [removeGameId, setRemoveGameId] = useState(null);
 
     const handleGameFetch = () => {
@@ -48,6 +50,10 @@ export default function GameListScreen({ navigation }) {
         setVisibleRemove(!visibleRemove);
     }
 
+    const toggleSettingsOverlay = () => {
+        setVisibleSettings(!visibleSettings);
+    }
+
     const handleReset = () => {
         SQLiteService.resetDb()
         .then(() => handleGameFetch())
@@ -70,34 +76,67 @@ export default function GameListScreen({ navigation }) {
             onLongPress={() => handleLongPress(item.id)}
         >
             <ListItem.Content style={styles.listContainer}>
-                <ListItem.Title>{item.title}</ListItem.Title>
+                <View>
+                <ListItem.Title style={styles.listTitle}>{item.title}</ListItem.Title>
+                {item.winner !== null ? 
+                <ListItem.Subtitle style={styles.listSubtitle}>
+                    Voittaja: {item.winner}    
+                </ListItem.Subtitle>
+                :
+                <ListItem.Subtitle style={styles.listSubtitle}>
+                    Peli kesken
+                </ListItem.Subtitle>
+                }
+                </View>
+                <ListItem.Chevron 
+                    color="black"
+                    size={25}
+                />
             </ListItem.Content>
         </ListItem>
     )
 
     renderHeader = () => (
         <View style={styles.listHeader}>
-            <Text h2>Testipesti</Text>
-            <Button radius={'sm'} type="solid" 
-                onPress={() => toggleAddOverlay()}
-            >
-                Lisää
-                <Icon name='add' />
-            </Button>
-            <Button
-                onPress={() => handleReset()}
-                title="Reset"
-            />
+            <Text h2>Pelit</Text>
+            <View style={styles.headerContainer}>
+                <Button
+                    onPress={() => toggleAddOverlay()}
+                >
+                    
+                    <Icon 
+                        name="add"
+                        color="white"
+                        size={25}
+                    />
+                </Button>
+                <Button
+                    onPress={() => toggleSettingsOverlay()}
+                    
+                >
+                    <Icon
+                        name="settings"
+                        color="white"
+                        size={25}
+                    />
+                </Button>
+            </View>
         </View>
     )
 
     return(
         <View style={styles.container}>
+            <Header 
+                centerComponent={{ text: 'Mölkkylaskuri', style: styles.headerTitle }}
+            />
             <Overlay isVisible={visibleAdd} onBackdropPress={toggleAddOverlay}>
                 <AddGameDialog game={game} setGame={setGame} handleAddGame={handleAddGame} toggleAddOverlay={toggleAddOverlay} />
             </Overlay>
             <Overlay isVisible={visibleRemove} onBackdropPress={toggleRemoveOverlay}>
                 <DeleteGameDialog gameId={removeGameId} setGameId={setRemoveGameId} handleDeleteGame={handleDeleteGame} toggleOverlay={toggleRemoveOverlay}/>
+            </Overlay>
+            <Overlay isVisible={visibleSettings} onBackdropPress={toggleSettingsOverlay}>
+                <SettingsDialog handleReset={handleReset} toggleOverlay={toggleSettingsOverlay}/>
             </Overlay>
             <FlatList
                 style={styles.list}
@@ -127,6 +166,12 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         paddingHorizontal: 10
     },
+    headerContainer: {
+        padding: 10,
+        flexDirection: 'row',
+        width: 135,
+        justifyContent: 'space-between'
+    },
     input: {
         width: '100%',
         margin: 5,
@@ -146,10 +191,16 @@ const styles = StyleSheet.create({
     listSubContainer: {
         flexDirection: 'row'
     },
-    subtitle: {
+    listTitle: {
+        fontWeight: 'bold',
+        fontSize: 20
+    },
+    listSubtitle: {
         color: 'gray'
     },
-    icon: {
-        fontSize: 20
+    headerTitle: {
+        color: 'white',
+        fontSize: 25
     }
+
   });

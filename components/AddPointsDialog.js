@@ -19,7 +19,7 @@ export default function AddPointsDialog({ handleTurn, toggleOverlay, turn, setTu
 
     return(
         <View style={styles.dialogContainer}>
-            {turn.strikes < 3 ? 
+            {turn.strikes < 3 && turn.points !== 50 ? 
             <>
                 <Text h4>Lisää pisteitä</Text>
                 <Text h4>{points}</Text>
@@ -29,8 +29,17 @@ export default function AddPointsDialog({ handleTurn, toggleOverlay, turn, setTu
                     value={points}
                     onValueChange={setPoints}
                     step={1}
+                    thumbProps={{
+                        children: (
+                            <Icon 
+                                name="fingerprint"
+                                color="white"
+                                size={37}
+                            />
+                        )
+                    }}
                 />
-                <View>
+                <View style={styles.buttonContainer}>
                     <Button color="green"
                         onPress={() => handleAdd()}
                     >
@@ -49,7 +58,7 @@ export default function AddPointsDialog({ handleTurn, toggleOverlay, turn, setTu
                     </Button>
                 </View> 
             </>
-            :
+            : turn.strikes === 3 ? 
             <>
                 <Text h4>Pelaaja on tippunut pelistä!</Text>
                 <Button color="red"
@@ -60,7 +69,20 @@ export default function AddPointsDialog({ handleTurn, toggleOverlay, turn, setTu
                             color="white"
                         />
                     </Button>
-            </> }
+            </>
+            :
+            <>
+                <Text h4>Pelaajalla on 50 pistettä!</Text>
+                <Button color="red"
+                        onPress={() => handleClose()}
+                    >
+                        <Icon
+                            name="close"
+                            color="white"
+                        />
+                    </Button>                
+            </>
+            }
         </View>
     )
 }
@@ -82,6 +104,14 @@ const styles = StyleSheet.create({
         
     },
     slider: {
-        width: '100%'
+        width: '100%',
+        paddingVertical: 40,
+        justifyContent: 'center'
+    },
+    buttonContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-evenly',
+        width: '80%',
+        paddingVertical: 15
     }
 })

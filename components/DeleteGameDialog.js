@@ -16,8 +16,8 @@ export default function DeleteGameDialog({ gameId, setGameId, handleDeleteGame, 
 
     return(
         <View style={styles.dialogContainer} >
-            <Text h3>Haluatko varmasti poistaa pelin?</Text>
-            <View>
+            <Text h3>Poista peli?</Text>
+            <View style={styles.buttonContainer}>
                 <Button color="green"
                     onPress={() => handleDelete()}
                 >
@@ -51,7 +51,12 @@ const styles = StyleSheet.create({
     },
     dialogInput: {
         width: 300,
-        padding: 10
-        
+        padding: 10   
+    },
+    buttonContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-evenly',
+        width: '80%',
+        paddingVertical: 15
     }
 })
