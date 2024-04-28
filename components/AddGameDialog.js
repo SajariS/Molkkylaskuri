@@ -16,7 +16,7 @@ export default function AddGameDialog({ game, setGame, handleAddGame, toggleAddO
                 'Virheellinen syöte!',
                 'Pelin nimi ei voi olla tyhjä',
                 [
-                    { text: 'OK', onPress: () => console.log("Ok")}
+                    { text: 'OK', onPress: () => {}}
                 ]
             )
         }

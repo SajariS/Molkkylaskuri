@@ -1,5 +1,3 @@
-
-
 const ValidationService = {
 
     validateText: (input) => {

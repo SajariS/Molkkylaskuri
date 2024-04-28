@@ -1,5 +1,5 @@
 import { useIsFocused } from "@react-navigation/native";
-import { Button, Input, Overlay, Text, Icon, ListItem, Header } from "@rneui/themed";
+import { Button, Overlay, Text, Icon, ListItem, Header } from "@rneui/themed";
 import { useEffect, useState } from "react";
 import { FlatList, StyleSheet, View } from "react-native";
 import SQLiteService from "../services/SQLiteService";
@@ -58,7 +58,6 @@ export default function GameScreen({ navigation, route }) {
     }
 
     const handlePress = (playerData) => {
-        console.log(playerData);
         setTurn(playerData);
         togglePointsOverlay();
     }
@@ -94,10 +93,6 @@ export default function GameScreen({ navigation, route }) {
 
     useEffect(() => {
         if(isFocused) {
-            /*setGame({...game,
-                title: gameData.title,
-                id: gameData.id
-            }) */
             handleGameFetch(gameData.id);
             handleUpdate();
         }

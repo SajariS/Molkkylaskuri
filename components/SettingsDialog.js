@@ -23,17 +23,36 @@ export default function SettingsDialog({ handleReset, toggleOverlay }) {
         <ScrollView style={styles.dialogContainer} contentContainerStyle={styles.scrollContent}>
             <Text h4 h4Style={styles.header4}>Mölkyn säännöt</Text>
                 <Text style={styles.subtitle}>Valmistelu</Text>
-                <Text>Numeroidut keilat asetetaan tiiviiseen muodostelmaan. Heittolinja piirretään 3-4 metrin päähän tästä muodostelmasta. Pelaajat toimivat vuorotellen pisteiden kirjureina (katso ”Pelin loppu”).</Text>
+                <Text>
+                    Numeroidut keilat asetetaan tiiviiseen muodostelmaan. 
+                    Heittolinja piirretään 3-4 metrin päähän tästä muodostelmasta. 
+                    Pelaajat toimivat vuorotellen pisteiden kirjureina (katso ”Pelin loppu”).
+                    </Text>
                 <Text style={styles.subtitle}>Heitto järjestys</Text>
-                <Text>Ensimmäisessä pelissä heittojärjestys arvotaan. Seuraavissa peleissä heittojärjestys muodostetaan edellisen pelin tulosten perusteella pienimmästä pistemäärästä suurimpaan.</Text>
+                <Text>
+                    Ensimmäisessä pelissä heittojärjestys arvotaan. 
+                    Seuraavissa peleissä heittojärjestys muodostetaan edellisen pelin tulosten perusteella pienimmästä pistemäärästä suurimpaan.
+                </Text>
                 <Text style={styles.subtitle}>Aloitus</Text>
-                <Text>Ensimmäinen pelaaja heittää heittokapulan keilamuodostelmaa kohti ja yrittää kaataa keiloja. heittokapula heitetään aina alakautta.</Text>
+                <Text>
+                    Ensimmäinen pelaaja heittää heittokapulan keilamuodostelmaa kohti ja yrittää kaataa keiloja. 
+                    Heittokapula heitetään aina alakautta.
+                    </Text>
                 <Text style={styles.subtitle}>Pisteiden lasku</Text>
-                <Text>Jos yksi keila kaatuu, pisteet = keilaan kirjoitettu numero. Jos useampi kuin yksi keila kaatuu, pisteet = kaatuneiden keilojen lukumäärä.</Text>
+                <Text>
+                    Jos yksi keila kaatuu, pisteet = keilaan kirjoitettu numero. 
+                    Jos useampi kuin yksi keila kaatuu, pisteet = kaatuneiden keilojen lukumäärä.
+                </Text>
                 <Text style={styles.subtitle}>Kaatunut keila</Text>
-                <Text>Keilaa ei lasketa kaatuneeksi jos se nojaa toista keilaa tai heittokapulaa vasten. Heiton jälkeen keilat nostetaan takaisin pystyyn siihen paikkaan, mihin ne ovat heiton tuloksenapäätyneet.</Text>
+                <Text>
+                    Keilaa ei lasketa kaatuneeksi jos se nojaa toista keilaa tai heittokapulaa vasten. 
+                    Heiton jälkeen keilat nostetaan takaisin pystyyn siihen paikkaan, mihin ne ovat heiton tuloksenapäätyneet.
+                </Text>
                 <Text style={styles.subtitle}>Loppu</Text>
-                <Text>Jos pelaaja jää ilman tulosta kolmella peräkkäisellä heittokierroksella, hän putoaa pelistä ja toimii pisteiden kirjurina. Peli päättyy, kun yksi pelaajista saa kerättyä tasan 50 pistettä. Jos pelaaja saa yli 50 pistettä, hänen pistemääränsä lasketaan 25 pisteeseen.</Text>
+                <Text>Jos pelaaja jää ilman tulosta kolmella peräkkäisellä heittokierroksella, hän putoaa pelistä ja toimii pisteiden kirjurina. 
+                    Peli päättyy, kun yksi pelaajista saa kerättyä tasan 50 pistettä. 
+                    Jos pelaaja saa yli 50 pistettä, hänen pistemääränsä lasketaan 25 pisteeseen.
+                </Text>
 
             <Text h4 h4Style={styles.header4}>Sovelluksen ominaisuudet</Text>
                 <Text style={styles.subtitle}>Aloitus</Text>
@@ -90,7 +109,6 @@ const styles = StyleSheet.create({
         textAlign: 'center'
     },
     scrollContent: {
-        //alignItems: 'center'
         padding: 10
     },
     header4: {

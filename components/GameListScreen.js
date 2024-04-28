@@ -2,7 +2,7 @@ import { useIsFocused } from "@react-navigation/native";
 import { useEffect, useState } from "react";
 import { FlatList, StyleSheet, View } from "react-native";
 import SQLiteService from "../services/SQLiteService";
-import { Button, ButtonGroup, Header, Icon, ListItem, Overlay, Text } from "@rneui/themed";
+import { Button, Header, Icon, ListItem, Overlay, Text } from "@rneui/themed";
 import AddGameDialog from "./AddGameDialog";
 import DeleteGameDialog from "./DeleteGameDialog";
 import SettingsDialog from "./SettingsDialog";

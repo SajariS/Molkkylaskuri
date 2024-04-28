@@ -29,7 +29,7 @@ export default function AddPlayerDialog({ game, handleUpdate, toggleOverlay, gam
                 'Virheellinen syöte!',
                 'Pelaajan nimi ei voi olla tyhjä',
                 [
-                    { text: 'OK', onPress: () => console.log("Ok")}
+                    { text: 'OK', onPress: () => {}}
                 ]
             )            
         }
@@ -86,7 +86,6 @@ export default function AddPlayerDialog({ game, handleUpdate, toggleOverlay, gam
         </ListItem>
     )
 
-    //TODO Estä pelissä olevan pelaajan uudestaan lisääminen
     return(
         <View style={styles.dialogContainer}>
             <Text h3>Lisää pelaaja peliin</Text>

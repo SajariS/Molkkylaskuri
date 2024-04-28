@@ -1,14 +1,9 @@
-//Käytä Expon SQLite (next) kirjastoa
-
-// OpenDatabaseAsync ei toimi, mennään syncillä, initialize toimii normaalisti;
-
 import * as SQLite from 'expo-sqlite/next';
 const db = SQLite.openDatabaseSync('molkkyDb');
 
 const SQLiteService = {
 
-    //Alustus 
-    
+    //Alustus    
     initialize: async () => {
         try {
             await db.execAsync(`
@@ -42,6 +37,7 @@ const SQLiteService = {
 
     },
 
+    //Resetointi
     resetDb: async () => {
         try {
             await db.execAsync(`
@@ -72,6 +68,7 @@ const SQLiteService = {
         }
     },
 
+    //Hae peli id:llä
     fetchGameById: async (gameId) => {
         try {
             const data = await db.getFirstAsync('SELECT * FROM game WHERE id = $gameId', {
@@ -84,6 +81,7 @@ const SQLiteService = {
         }
     },
 
+    //Hae pelaajat
     fetchPlayer: async () => {
         try {
             const data = await db.getAllAsync('SELECT * FROM player');
@@ -99,6 +97,7 @@ const SQLiteService = {
         }
     },
 
+    //Hae peli - pelaaja yhteydet
     fetchGamePlayer: async () => {
         try {
             const data = await db.getAllAsync('SELECT * FROM gameplayer');
@@ -113,38 +112,6 @@ const SQLiteService = {
             throw new Error(`Error fetching rows from gameplayer: ${err}`);
         }
     },
-
-    /* Taulua ei voi korjavata ?, TODO
-    // TODO Tee tarpeen mukaan omat jokaiselle
-    //Hae saadulla taululla ja id:llä ensimmäinen kyselyä vastaava rivi
-    fetchRowById: async (table, id) => {
-        try {
-            const data = await db.getFirstAsync('SELECT * FROM ? WHERE id = ?', [table, id]);
-            if (data.length > 0) {
-                return data;
-            }
-            else {
-                throw new Error('No rows found with id: ' + id);
-            }
-        }
-        catch (err) {
-            console.error(err);
-            throw new Error('Error fetching data from DB: ' + err);
-        }
-    },
-
-    //Poista rivi saadusta taulusta id:n perusteella
-    removeRowById: async (table, id) => {
-        try {
-            await db.runAsync('DELETE FROM $table WHERE id = $id', {
-                $table: table,
-                $id: id
-            });
-        }
-        catch (err) {
-            throw new Error('Error removing row from DB: ' + err);
-        }
-    }, */
 
     //Lisää rivi game tauluun
     addGame: async ({ game }) => {
@@ -261,6 +228,7 @@ const SQLiteService = {
         }
     },
 
+    //Päivitä ohi lyönnit
     setStrikes: async (gameId, playerId, strikes) => {
         try {
             await db.runAsync('UPDATE gameplayer SET strikes = $strikes WHERE game_id = $gameId AND player_id = $playerId', {
@@ -274,6 +242,7 @@ const SQLiteService = {
         }
     },
 
+    //Päivitä voittaja peliin
     setWinner: async (gameId, username) => {
         try {
             await db.runAsync('UPDATE game SET winner = $winner WHERE id = $gameId', {
