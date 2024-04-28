@@ -12,18 +12,21 @@ Laskuri käyttää sisäistä SQLite tietokantaa, joka pitää muistissa pelit, 
 Laskuri sisältää listan peleistä ja jokaiselle pelille on oma ruutu. Kummassakin ruudussa on erillaisia dialogeja, joilal käyttäjältä varmistetaan toiminto tai pyydetään lisää tietoa, esim. pelaajan nimi.
 
 ### Lista peleistä
-<img src="/images/PeliLista.png" width="600" height="900">
+<img src="/images/PeliLista.png" width="465" height="1006">
 
 ### Pelin ikkuna
-<img src="/images/PeliRuutu.png" width="600" height="900">
+<img src="/images/PeliRuutu.png" width="467" height="1006">
 
 ### Pelaajan lisääminen peliin
-<img src="/images/PelaajanLisaysDia.png" width="600" height="900">
+<img src="/images/PelaajanLisaysDia.png" width="441" height="896">
 
 ### Pisteiden lisäys dialogi
-<img src="/images/PisteenLisaysDia.png" width="600" height="900">
+<img src="/images/PisteenLisaysDia.png" width="448" height="468">
 
 ## Käytetyt teknologiat ja kirjastot
+
+### React Native
+<a href="https://reactnative.dev/">https://reactnative.dev/</a>
 
 ### Expo
 <a href="https://expo.dev/">https://expo.dev/</a>
@@ -34,7 +37,7 @@ Laskuri sisältää listan peleistä ja jokaiselle pelille on oma ruutu. Kummass
 ### React Native Elements
 <a href="https://reactnativeelements.com/">https://reactnativeelements.com/</a>
 
-### React Native 
+### React Native Navigation
 <a href="https://reactnavigation.org/">https://reactnavigation.org/</a>
 
 ## Yhteystiedot
